@@ -1,8 +1,8 @@
-package single
+package wallet
 
 import "github.com/spacemeshos/vm"
 
-//go:generate scalegen -pkg single -file types_scale.go -types Arguments,SpawnArguments,SpendPayload,Nonce,SpawnPayload -imports github.com/spacemeshos/vm/single
+//go:generate scalegen -pkg wallet -file types_scale.go -types Arguments,SpawnArguments,SpendPayload,Nonce,SpawnPayload -imports github.com/spacemeshos/vm/wallet
 
 type SpawnArguments struct {
 	PublicKey vm.PublicKey

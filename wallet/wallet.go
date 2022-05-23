@@ -1,4 +1,4 @@
-package single
+package wallet
 
 import (
 	"github.com/oasisprotocol/curve25519-voi/primitives/ed25519"
@@ -11,7 +11,7 @@ func New(ctx *vm.Context, args SpawnArguments) Single {
 	return Single{PublicKey: args.PublicKey}
 }
 
-//go:generate scalegen -pkg single -file single_scale.go -types Single -imports github.com/spacemeshos/vm/single
+//go:generate scalegen -pkg wallet -file wallet_scale.go -types Single -imports github.com/spacemeshos/vm/wallet
 
 type Single struct {
 	PublicKey vm.PublicKey
