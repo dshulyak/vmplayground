@@ -27,7 +27,7 @@ type AccountState struct {
 	// State is decoded into precompile as is
 	State    []byte
 	Balance  uint64
-	Template Address
+	Template *Address // only available for spawned account
 }
 
 type Storage interface {
@@ -39,21 +39,22 @@ type Context struct {
 	Template  any
 	State     *AccountState
 	principal Address
-	host      *Host
 
 	consumed uint64
-}
-
-func (c *Context) Load(addr Address) {
-	c.State = c.host.storage.Get(addr)
+	price    uint64
+	funds    uint64
 }
 
 func (c *Context) Transfer(to Address, value uint64) {}
 
 func (c *Context) Consume(gas uint64) {
 	c.consumed += gas
+	if c.consumed*c.price+c.funds > c.State.Balance {
+		c.Fail(errors.New("out of funds"))
+	}
 }
 
 func (c *Context) Fail(err error) {
+	//
 	panic(err)
 }

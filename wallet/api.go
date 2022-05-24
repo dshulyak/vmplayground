@@ -1,15 +1,16 @@
-package single
+package wallet
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
 
 	"github.com/spacemeshos/go-scale"
 
 	"github.com/spacemeshos/vm"
-	"github.com/spacemeshos/vm/generic"
 )
 
-func Parse(ctx *vm.Context, method uint8, decoder *scale.Decoder) (payload generic.Payload) {
+func Parse(ctx *vm.Context, method uint8, decoder *scale.Decoder) (payload vm.Header) {
 	ctx.Consume(10)
 	switch method {
 	case 0:
@@ -32,23 +33,33 @@ func Parse(ctx *vm.Context, method uint8, decoder *scale.Decoder) (payload gener
 	return payload
 }
 
-func Load(ctx *vm.Context, method uint8, payload *generic.Payload) any {
-
-	return nil
+func Load(ctx *vm.Context, method uint8, header *vm.Header) any {
+	if method == 0 {
+		if ctx.State.Template != nil {
+			ctx.Fail(errors.New("account already spawned"))
+		}
+		return New(ctx, header.Arguments.(SpawnArguments))
+	}
+	decoder := scale.NewDecoder(bytes.NewReader(ctx.State.State))
+	var wallet Wallet
+	if _, err := wallet.DecodeScale(decoder); err != nil {
+		ctx.Fail(fmt.Errorf("internval error %w", err))
+	}
+	return &wallet
 }
 
 func Verify(ctx *vm.Context, raw []byte) bool {
 	ctx.Consume(50)
-	return ctx.Template.(*Single).Verify(raw)
+	return ctx.Template.(*Wallet).Verify(raw)
 }
 
-func Exec(ctx *vm.Context, method uint8, payload *generic.Payload) {
+func Exec(ctx *vm.Context, method uint8, header *vm.Header) {
 	switch method {
 	case 0:
 		ctx.Consume(100)
 	case 1:
 		ctx.Consume(50)
-		ctx.Template.(*Single).Spend(ctx, payload.Arguments.(*Arguments))
+		ctx.Template.(*Wallet).Spend(ctx, header.Arguments.(*Arguments))
 	default:
 		ctx.Fail(vm.ErrUnknownMethodSelector)
 	}

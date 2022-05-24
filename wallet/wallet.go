@@ -4,20 +4,19 @@ import (
 	"github.com/oasisprotocol/curve25519-voi/primitives/ed25519"
 
 	"github.com/spacemeshos/vm"
-	"github.com/spacemeshos/vm/generic"
 )
 
-func New(ctx *vm.Context, args SpawnArguments) Single {
-	return Single{PublicKey: args.PublicKey}
+func New(ctx *vm.Context, args SpawnArguments) *Wallet {
+	return &Wallet{PublicKey: args.PublicKey}
 }
 
-//go:generate scalegen -pkg wallet -file wallet_scale.go -types Single -imports github.com/spacemeshos/vm/wallet
+//go:generate scalegen -pkg wallet -file wallet_scale.go -types Wallet -imports github.com/spacemeshos/vm/wallet
 
-type Single struct {
+type Wallet struct {
 	PublicKey vm.PublicKey
 }
 
-func (s *Single) MaxSpend(method uint8, payload *generic.Payload) uint64 {
+func (s *Wallet) MaxSpend(method uint8, payload *vm.Header) uint64 {
 	switch method {
 	case 0:
 		return 0
@@ -28,13 +27,13 @@ func (s *Single) MaxSpend(method uint8, payload *generic.Payload) uint64 {
 	}
 }
 
-func (s *Single) Verify(tx []byte) bool {
+func (s *Wallet) Verify(tx []byte) bool {
 	if len(tx) < 64 {
 		return false
 	}
 	return ed25519.Verify(ed25519.PublicKey(s.PublicKey[:]), tx[:len(tx)-64], tx[len(tx)-64:])
 }
 
-func (s *Single) Spend(ctx *vm.Context, args *Arguments) {
+func (s *Wallet) Spend(ctx *vm.Context, args *Arguments) {
 	ctx.Transfer(args.Destination, args.Amount)
 }
