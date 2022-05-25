@@ -16,12 +16,12 @@ type Wallet struct {
 	PublicKey vm.PublicKey
 }
 
-func (s *Wallet) MaxSpend(method uint8, payload *vm.Header) uint64 {
+func (s *Wallet) MaxSpend(method uint8, header *vm.Header, args any) uint64 {
 	switch method {
 	case 0:
 		return 0
 	case 1:
-		return payload.Arguments.(*Arguments).Amount
+		return args.(*Arguments).Amount
 	default:
 		panic("unreachable")
 	}

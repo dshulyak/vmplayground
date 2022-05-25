@@ -19,6 +19,10 @@ func (l *List[T]) Add(value T) {
 	}
 }
 
+func (l *List[T]) Iterate() *Iterator[T] {
+	return &Iterator[T]{current: l.head}
+}
+
 type Iterator[T any] struct {
 	current *element[T]
 }

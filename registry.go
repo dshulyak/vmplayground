@@ -8,7 +8,7 @@ var (
 
 type TemplateAPI struct {
 	Parse  func(*Context, uint8, *scale.Decoder) Header
-	Load   func(*Context, uint8, *Header) any
+	Load   func(*Context, uint8, any) any
 	Verify func(*Context, []byte) bool
-	Exec   func(*Context, uint8, *Header)
+	Exec   func(*Context, uint8, any)
 }

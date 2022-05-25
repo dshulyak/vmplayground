@@ -36,9 +36,11 @@ type Storage interface {
 }
 
 type Context struct {
+	handler   *TemplateAPI
 	Template  any
 	State     *AccountState
 	principal Address
+	method    uint8
 
 	consumed uint64
 	price    uint64

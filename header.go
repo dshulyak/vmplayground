@@ -1,8 +1,7 @@
 package vm
 
 type Header struct {
-	Arguments any
-	Nonce     struct {
+	Nonce struct {
 		Counter  uint64
 		Bitfield uint8
 	}
