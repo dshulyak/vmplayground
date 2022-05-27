@@ -32,11 +32,10 @@ func (r *Request) Parse() (*Header, error) {
 }
 
 func (r *Request) Verify() bool {
-	return r.vm.verify(r.ctx.handler, r.ctx, r.raw)
+	return r.vm.verify(r.ctx, r.raw)
 }
 
 func (vm *VM) Validation(raw []byte) *Request {
-	// TODO use multi step request pattern to insert conservative state validation between parse/load and verify
 	return &Request{
 		decoder: scale.NewDecoder(bytes.NewReader(raw)),
 		raw:     raw,
@@ -63,9 +62,6 @@ func (vm *VM) parse(decoder *scale.Decoder) (*Header, *Context, any, error) {
 	// fetch whole state in a single scan
 	state := vm.storage.Get(principal)
 	if method == 0 {
-		if state.Template != nil {
-			return nil, nil, nil, errors.New("already spawned")
-		}
 		var template scale.Address
 		if _, err := template.DecodeScale(decoder); err != nil {
 			return nil, nil, nil, err
@@ -77,19 +73,18 @@ func (vm *VM) parse(decoder *scale.Decoder) (*Header, *Context, any, error) {
 		return nil, nil, nil, errors.New("unknown template")
 	}
 	ctx := &Context{
+		handler:   handler,
 		State:     state,
 		principal: principal,
 		method:    method,
 	}
-	header := handler.Parse(ctx, method, decoder)
-	spawned := handler.Load(ctx, method, &header)
-	ctx.Template = spawned
-	ctx.handler = handler
-	return &header, ctx, nil, nil
+	header, args := handler.Parse(ctx, method, decoder)
+	ctx.Template = handler.Load(ctx, method, &header)
+	return &header, ctx, args, nil
 }
 
-func (vm *VM) verify(handler *TemplateAPI, ctx *Context, raw []byte) bool {
-	return handler.Verify(ctx, raw)
+func (vm *VM) verify(ctx *Context, raw []byte) bool {
+	return ctx.Template.Verify(ctx, raw)
 }
 
 // Apply transaction. Returns true if transaction run out of gas in the validation phase.

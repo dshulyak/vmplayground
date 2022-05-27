@@ -6,7 +6,7 @@ import (
 	"github.com/spacemeshos/vm"
 )
 
-func New(ctx *vm.Context, args SpawnArguments) *Wallet {
+func New(args SpawnArguments) *Wallet {
 	return &Wallet{PublicKey: args.PublicKey}
 }
 
@@ -27,7 +27,8 @@ func (s *Wallet) MaxSpend(method uint8, header *vm.Header, args any) uint64 {
 	}
 }
 
-func (s *Wallet) Verify(tx []byte) bool {
+func (s *Wallet) Verify(ctx *vm.Context, tx []byte) bool {
+	ctx.Consume(50)
 	if len(tx) < 64 {
 		return false
 	}
